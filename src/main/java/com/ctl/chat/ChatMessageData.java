@@ -4,17 +4,28 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public record ChatMessageData(String sender, String content, String fullMessage) {
-    private static final Pattern CHAT_PATTERN = Pattern.compile("^<([^>]+)>\\s*(.+)$");
+    // vanilla: <Name> message
+    private static final Pattern ANGLE_BRACKET_PATTERN = Pattern.compile("^<([^>]+)>\\s*(.+)$");
+    // common server format: Name: message / Name» message / Name> message / Name - message
+    private static final Pattern NAME_SEPARATOR_PATTERN =
+            Pattern.compile("^([A-Za-z0-9_]{1,16})\\s*[:»>-]\\s*(.+)$");
 
     public static ChatMessageData parse(String message) {
-        Matcher matcher = CHAT_PATTERN.matcher(message);
-        if (matcher.matches()) {
-            return new ChatMessageData(matcher.group(1), matcher.group(2), message);
+        Matcher angleMatcher = ANGLE_BRACKET_PATTERN.matcher(message);
+        if (angleMatcher.matches()) {
+            return new ChatMessageData(angleMatcher.group(1), angleMatcher.group(2), message);
         }
-        return null;
+
+        Matcher nameMatcher = NAME_SEPARATOR_PATTERN.matcher(message);
+        if (nameMatcher.matches()) {
+            return new ChatMessageData(nameMatcher.group(1), nameMatcher.group(2), message);
+        }
+
+        // fallback: translate the raw line, sender unknown
+        return new ChatMessageData(null, message, message);
     }
 
     public boolean isSamePlayer(String playerName) {
-        return sender != null && sender.equals(playerName);
+        return sender != null && sender.equalsIgnoreCase(playerName);
     }
 }

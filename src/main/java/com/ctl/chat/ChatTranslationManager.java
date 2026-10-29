@@ -32,7 +32,6 @@ public class ChatTranslationManager {
         }
 
         ChatMessageData data = ChatMessageData.parse(messageText);
-        if (data == null) return;
 
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null && data.isSamePlayer(client.player.getName().getString())) {
@@ -80,7 +79,8 @@ public class ChatTranslationManager {
                 ? LanguageManager.getFlagEmoji(targetInfo.region())
                 : LanguageManager.getFlagEmoji(targetLang.toUpperCase());
 
-        return "└[" + sourceFlag + "→" + targetFlag + "] <" + sender + "> "
+        String senderPart = (sender != null && !sender.isEmpty()) ? "<" + sender + "> " : "";
+        return "└[" + sourceFlag + "→" + targetFlag + "] " + senderPart
                 + result.translatedText();
     }
 

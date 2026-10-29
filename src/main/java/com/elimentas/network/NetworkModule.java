@@ -7,7 +7,6 @@ import com.elimentas.data.PlayerDataHandler;
 import com.elimentas.data.PlayerSkillData;
 import com.elimentas.effect.EffectPlayer;
 import com.elimentas.skill.*;
-import com.elimentas.skill.fire.FireballSkill;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,11 +21,6 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 @EventBusSubscriber(modid = ElimenTas.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class NetworkModule {
-
-    private static final ResourceLocation[] SLOT_SKILLS = {
-            FireballSkill.ID,
-            null, null, null
-    };
 
     public static void init(IEventBus modBus) {
         ElimenTas.LOGGER.debug("NetworkModule initialized.");
@@ -59,6 +53,18 @@ public class NetworkModule {
                 SkillTreeSyncPayload.STREAM_CODEC,
                 NetworkModule::handleSkillTreeSync
         );
+
+        registrar.playToServer(
+                SkillEquipPayload.TYPE,
+                SkillEquipPayload.STREAM_CODEC,
+                NetworkModule::handleSkillEquip
+        );
+
+        registrar.playToClient(
+                CooldownSyncPayload.TYPE,
+                CooldownSyncPayload.STREAM_CODEC,
+                NetworkModule::handleCooldownSync
+        );
     }
 
     private static void handleSkillActivate(SkillActivatePayload payload, IPayloadContext context) {
@@ -67,9 +73,8 @@ public class NetworkModule {
             if (!(player.level() instanceof ServerLevel serverLevel)) return;
 
             int slot = payload.slotIndex();
-            if (slot < 0 || slot >= SLOT_SKILLS.length) return;
-
-            ResourceLocation skillId = SLOT_SKILLS[slot];
+            PlayerSkillData data = player.getData(ModAttachments.SKILL_DATA);
+            ResourceLocation skillId = data.getSkillIdForSlot(slot);
             if (skillId == null) return;
 
             Skill skill = SkillRegistry.get(skillId);
@@ -84,6 +89,10 @@ public class NetworkModule {
                     player.getLookAngle()
             );
             skill.execute(skillContext);
+
+            PacketDistributor.sendToPlayer(player,
+                    new CooldownSyncPayload(skillId.toString(),
+                            skill.cooldownTicks(), skill.cooldownTicks()));
 
             ElimenTas.LOGGER.debug("Player {} activated skill {}", player.getName().getString(), skillId);
         });
@@ -109,9 +118,30 @@ public class NetworkModule {
         });
     }
 
+    private static void handleSkillEquip(SkillEquipPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (!(context.player() instanceof ServerPlayer player)) return;
+
+            PlayerSkillData data = player.getData(ModAttachments.SKILL_DATA);
+            ResourceLocation nodeId = payload.nodeId().isEmpty() ? null : ResourceLocation.parse(payload.nodeId());
+
+            if (data.equipSkill(payload.slotIndex(), nodeId)) {
+                PlayerDataHandler.syncToClient(player);
+                ElimenTas.LOGGER.debug("Player {} equipped slot {} with {}",
+                        player.getName().getString(), payload.slotIndex(), payload.nodeId());
+            }
+        });
+    }
+
     private static void handleSkillTreeSync(SkillTreeSyncPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
-            ClientSkillData.sync(payload.skillPoints(), payload.unlockedNodes());
+            ClientSkillData.sync(payload.skillPoints(), payload.unlockedNodes(), payload.equippedSlots());
+        });
+    }
+
+    private static void handleCooldownSync(CooldownSyncPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            ClientSkillData.syncCooldown(payload.skillId(), payload.remaining(), payload.total());
         });
     }
 

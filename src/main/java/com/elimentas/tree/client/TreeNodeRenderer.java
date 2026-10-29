@@ -11,7 +11,7 @@ public class TreeNodeRenderer {
     private static final int GLOW_EXTRA = 4;
 
     public void render(GuiGraphics graphics, SkillNode node, float screenX, float screenY,
-                       float zoom, boolean hovered, boolean unlocked, float time) {
+                       float zoom, boolean hovered, boolean unlocked, boolean equipped, float time) {
         int baseSize = node.tier() == 0 ? CORE_SIZE : NODE_SIZE;
         float size = baseSize * zoom;
 
@@ -26,7 +26,9 @@ public class TreeNodeRenderer {
         int b = color & 0xFF;
 
         float pulse;
-        if (unlocked) {
+        if (equipped) {
+            pulse = (float) Math.sin(time * 0.12f) * 0.2f + 0.9f;
+        } else if (unlocked) {
             pulse = (float) Math.sin(time * 0.08f + node.x() * 0.01f) * 0.15f + 0.85f;
         } else {
             pulse = 0.6f;
@@ -37,7 +39,7 @@ public class TreeNodeRenderer {
         RenderSystem.defaultBlendFunc();
 
         float glowSize = (size + GLOW_EXTRA * zoom) * pulse;
-        int glowAlpha = hovered ? 80 : (unlocked ? 40 : 20);
+        int glowAlpha = equipped ? 100 : (hovered ? 80 : (unlocked ? 40 : 20));
         int glowColor = (glowAlpha << 24) | (r << 16) | (g << 8) | b;
         graphics.fill(
                 (int) (screenX - glowSize), (int) (screenY - glowSize),
@@ -63,6 +65,19 @@ public class TreeNodeRenderer {
                     (int) (screenX + centerSize / 2), (int) (screenY + centerSize / 2),
                     white
             );
+        }
+
+        if (equipped) {
+            int ringSize = (int) (glowSize + 2 * zoom);
+            int gold = 0xAAFFD700;
+            graphics.fill((int) (screenX - ringSize), (int) (screenY - ringSize),
+                    (int) (screenX + ringSize), (int) (screenY - ringSize + 1), gold);
+            graphics.fill((int) (screenX - ringSize), (int) (screenY + ringSize - 1),
+                    (int) (screenX + ringSize), (int) (screenY + ringSize), gold);
+            graphics.fill((int) (screenX - ringSize), (int) (screenY - ringSize),
+                    (int) (screenX - ringSize + 1), (int) (screenY + ringSize), gold);
+            graphics.fill((int) (screenX + ringSize - 1), (int) (screenY - ringSize),
+                    (int) (screenX + ringSize), (int) (screenY + ringSize), gold);
         }
 
         RenderSystem.disableBlend();

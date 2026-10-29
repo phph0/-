@@ -73,7 +73,7 @@ public class TreeConnectionRenderer {
         return b + "|" + a;
     }
 
-    static int elementColor(Element element, float brightness) {
+    public static int elementColor(Element element, float brightness) {
         return switch (element) {
             case FIRE -> lerpColor(0xFF6A00, 0xFFD700, brightness);
             case ICE -> lerpColor(0x4FC3F7, 0xE0F7FA, brightness);

@@ -2,11 +2,13 @@ package com.elimentas.tree.client;
 
 import com.elimentas.data.ClientSkillData;
 import com.elimentas.network.NodeUnlockPayload;
+import com.elimentas.network.SkillEquipPayload;
 import com.elimentas.tree.SkillNode;
 import com.elimentas.tree.SkillTreeDefinition;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
@@ -18,6 +20,7 @@ public class SkillTreeScreen extends Screen {
     private static final float MAX_ZOOM = 2.0f;
     private static final float ZOOM_SPEED = 0.1f;
     private static final double CLICK_THRESHOLD = 4.0;
+    private static final String[] SLOT_KEYS = {"Z", "X", "C", "V"};
 
     private final StarfieldBackground starfield = new StarfieldBackground();
     private final TreeNodeRenderer nodeRenderer = new TreeNodeRenderer();
@@ -34,6 +37,8 @@ public class SkillTreeScreen extends Screen {
     private boolean didDrag = false;
 
     private SkillNode hoveredNode = null;
+    private SkillNode equipMenuNode = null;
+    private int equipMenuX, equipMenuY;
 
     public SkillTreeScreen() {
         super(Component.translatable("screen.elimentas.skill_tree"));
@@ -65,18 +70,34 @@ public class SkillTreeScreen extends Screen {
             if (hovered) hoveredNode = node;
 
             boolean unlocked = ClientSkillData.isUnlocked(node.id());
-            nodeRenderer.render(graphics, node, sx, sy, zoom, hovered, unlocked, animTime);
+            boolean equipped = isEquipped(node.id());
+            nodeRenderer.render(graphics, node, sx, sy, zoom, hovered, unlocked, equipped, animTime);
         }
 
         renderElementLabels(graphics);
-
         renderSkillPointsHud(graphics);
 
-        if (hoveredNode != null) {
+        if (equipMenuNode != null) {
+            renderEquipMenu(graphics, mouseX, mouseY);
+        } else if (hoveredNode != null) {
             renderTooltip(graphics, mouseX, mouseY);
         }
 
         renderControls(graphics);
+    }
+
+    private boolean isEquipped(ResourceLocation nodeId) {
+        for (int i = 0; i < ClientSkillData.SLOT_COUNT; i++) {
+            if (nodeId.equals(ClientSkillData.getSlot(i))) return true;
+        }
+        return false;
+    }
+
+    private int getEquippedSlot(ResourceLocation nodeId) {
+        for (int i = 0; i < ClientSkillData.SLOT_COUNT; i++) {
+            if (nodeId.equals(ClientSkillData.getSlot(i))) return i;
+        }
+        return -1;
     }
 
     private void renderSkillPointsHud(GuiGraphics graphics) {
@@ -112,10 +133,22 @@ public class SkillTreeScreen extends Screen {
                 .withStyle(s -> s.withColor(0x888888)));
 
         if (unlocked) {
-            lines.add(Component.literal("✦ UNLOCKED")
+            lines.add(Component.literal("UNLOCKED")
                     .withStyle(s -> s.withColor(0x66BB6A).withBold(true)));
+            if (hoveredNode.skillId() != null) {
+                int slot = getEquippedSlot(hoveredNode.id());
+                if (slot >= 0) {
+                    lines.add(Component.literal("Equipped [" + SLOT_KEYS[slot] + "]")
+                            .withStyle(s -> s.withColor(0xFFD700)));
+                    lines.add(Component.literal("Right-click to unequip")
+                            .withStyle(s -> s.withColor(0x999999).withItalic(true)));
+                } else {
+                    lines.add(Component.literal("Right-click to equip")
+                            .withStyle(s -> s.withColor(0xFFD700)));
+                }
+            }
         } else {
-            lines.add(Component.literal("✧ LOCKED")
+            lines.add(Component.literal("LOCKED")
                     .withStyle(s -> s.withColor(0xFF5555)));
             if (canUnlockLocally(hoveredNode)) {
                 lines.add(Component.literal("Click to unlock (1 SP)")
@@ -125,10 +158,47 @@ public class SkillTreeScreen extends Screen {
 
         if (hoveredNode.skillId() != null) {
             lines.add(Component.literal("Skill: " + hoveredNode.skillId().getPath())
-                    .withStyle(s -> s.withColor(0x66BB6A)));
+                    .withStyle(s -> s.withColor(0x9E9E9E)));
         }
 
         graphics.renderTooltip(font, lines, java.util.Optional.empty(), mouseX, mouseY);
+    }
+
+    private void renderEquipMenu(GuiGraphics graphics, int mouseX, int mouseY) {
+        int menuW = 80;
+        int itemH = 16;
+        int menuH = ClientSkillData.SLOT_COUNT * itemH + 4;
+
+        int mx = equipMenuX;
+        int my = equipMenuY;
+        if (mx + menuW > width) mx = width - menuW;
+        if (my + menuH > height) my = height - menuH;
+
+        graphics.fill(mx, my, mx + menuW, my + menuH, 0xEE1A1A2E);
+        graphics.fill(mx, my, mx + menuW, my + 1, 0xFFFFD700);
+        graphics.fill(mx, my + menuH - 1, mx + menuW, my + menuH, 0xFFFFD700);
+        graphics.fill(mx, my, mx + 1, my + menuH, 0xFFFFD700);
+        graphics.fill(mx + menuW - 1, my, mx + menuW, my + menuH, 0xFFFFD700);
+
+        for (int i = 0; i < ClientSkillData.SLOT_COUNT; i++) {
+            int iy = my + 2 + i * itemH;
+            boolean hover = mouseX >= mx && mouseX < mx + menuW && mouseY >= iy && mouseY < iy + itemH;
+
+            if (hover) {
+                graphics.fill(mx + 1, iy, mx + menuW - 1, iy + itemH, 0x44FFFFFF);
+            }
+
+            ResourceLocation current = ClientSkillData.getSlot(i);
+            String label = "Slot " + SLOT_KEYS[i];
+            if (current != null) {
+                SkillNode n = SkillTreeDefinition.getNode(current);
+                if (n != null) label += ": " + n.name();
+            } else {
+                label += ": ---";
+            }
+
+            graphics.drawString(font, label, mx + 4, iy + 4, hover ? 0xFFFFFF : 0xCCCCCC, false);
+        }
     }
 
     private boolean canUnlockLocally(SkillNode node) {
@@ -137,7 +207,7 @@ public class SkillTreeScreen extends Screen {
 
         if (node.tier() == 0) return true;
 
-        for (net.minecraft.resources.ResourceLocation connId : node.connections()) {
+        for (ResourceLocation connId : node.connections()) {
             SkillNode conn = SkillTreeDefinition.getNode(connId);
             if (conn != null && conn.tier() < node.tier() && ClientSkillData.isUnlocked(connId)) {
                 return true;
@@ -155,12 +225,32 @@ public class SkillTreeScreen extends Screen {
     }
 
     private void renderControls(GuiGraphics graphics) {
-        graphics.drawString(font, "Scroll: Zoom | Drag: Pan | Click: Unlock | ESC: Close",
+        graphics.drawString(font, "LClick: Unlock | RClick: Equip | Scroll: Zoom | Drag: Pan",
                 8, height - 14, 0x66FFFFFF, false);
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (equipMenuNode != null) {
+            int menuW = 80;
+            int itemH = 16;
+            int mx = equipMenuX;
+            int my = equipMenuY;
+            if (mx + menuW > width) mx = width - menuW;
+            int menuH = ClientSkillData.SLOT_COUNT * itemH + 4;
+            if (my + menuH > height) my = height - menuH;
+
+            if (mouseX >= mx && mouseX < mx + menuW && mouseY >= my && mouseY < my + menuH) {
+                int idx = (int) ((mouseY - my - 2) / itemH);
+                if (idx >= 0 && idx < ClientSkillData.SLOT_COUNT) {
+                    PacketDistributor.sendToServer(
+                            new SkillEquipPayload(idx, equipMenuNode.id().toString()));
+                }
+            }
+            equipMenuNode = null;
+            return true;
+        }
+
         if (button == 0) {
             dragging = true;
             didDrag = false;
@@ -170,6 +260,21 @@ public class SkillTreeScreen extends Screen {
             dragScrollStartY = scrollY;
             return true;
         }
+
+        if (button == 1 && hoveredNode != null) {
+            if (ClientSkillData.isUnlocked(hoveredNode.id()) && hoveredNode.skillId() != null) {
+                int slot = getEquippedSlot(hoveredNode.id());
+                if (slot >= 0) {
+                    PacketDistributor.sendToServer(new SkillEquipPayload(slot, ""));
+                } else {
+                    equipMenuNode = hoveredNode;
+                    equipMenuX = (int) mouseX;
+                    equipMenuY = (int) mouseY;
+                }
+            }
+            return true;
+        }
+
         return super.mouseClicked(mouseX, mouseY, button);
     }
 
@@ -177,7 +282,7 @@ public class SkillTreeScreen extends Screen {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (button == 0) {
             dragging = false;
-            if (!didDrag && hoveredNode != null) {
+            if (!didDrag && hoveredNode != null && equipMenuNode == null) {
                 tryUnlockNode(hoveredNode);
             }
             return true;
@@ -224,7 +329,11 @@ public class SkillTreeScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_K) {
+        if (keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_K || keyCode == org.lwjgl.glfw.GLFW.GLFW_KEY_ESCAPE) {
+            if (equipMenuNode != null) {
+                equipMenuNode = null;
+                return true;
+            }
             onClose();
             return true;
         }

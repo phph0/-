@@ -9,7 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.List;
 
-public record SkillTreeSyncPayload(int skillPoints, List<String> unlockedNodes) implements CustomPacketPayload {
+public record SkillTreeSyncPayload(int skillPoints, List<String> unlockedNodes,
+                                   List<String> equippedSlots) implements CustomPacketPayload {
 
     public static final Type<SkillTreeSyncPayload> TYPE =
             new Type<>(ResourceLocation.fromNamespaceAndPath(ElimenTas.MOD_ID, "skill_tree_sync"));
@@ -18,6 +19,7 @@ public record SkillTreeSyncPayload(int skillPoints, List<String> unlockedNodes) 
             StreamCodec.composite(
                     ByteBufCodecs.INT, SkillTreeSyncPayload::skillPoints,
                     ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), SkillTreeSyncPayload::unlockedNodes,
+                    ByteBufCodecs.STRING_UTF8.apply(ByteBufCodecs.list()), SkillTreeSyncPayload::equippedSlots,
                     SkillTreeSyncPayload::new
             );
 

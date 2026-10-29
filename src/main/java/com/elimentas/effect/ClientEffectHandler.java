@@ -1,6 +1,8 @@
 package com.elimentas.effect;
 
 import com.elimentas.core.ElimenTas;
+import com.elimentas.data.ClientSkillData;
+import com.elimentas.ui.SkillSlotHudRenderer;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
@@ -17,6 +19,7 @@ public class ClientEffectHandler {
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
         EffectPlayer.tick();
+        ClientSkillData.tickCooldowns();
     }
 
     @SubscribeEvent
@@ -43,6 +46,11 @@ public class ClientEffectHandler {
                             tint.render(graphics, w, h);
                         }
                     }
+            );
+
+            event.registerAboveAll(
+                    ResourceLocation.fromNamespaceAndPath(ElimenTas.MOD_ID, "skill_slots"),
+                    SkillSlotHudRenderer::render
             );
         }
     }

@@ -41,7 +41,11 @@ public class PlayerDataHandler {
         java.util.List<String> nodeIds = data.unlockedNodes().stream()
                 .map(net.minecraft.resources.ResourceLocation::toString)
                 .toList();
+        java.util.List<String> slotIds = new java.util.ArrayList<>();
+        for (net.minecraft.resources.ResourceLocation slot : data.equippedSlots()) {
+            slotIds.add(slot != null ? slot.toString() : "");
+        }
         PacketDistributor.sendToPlayer(player,
-                new SkillTreeSyncPayload(data.skillPoints(), nodeIds));
+                new SkillTreeSyncPayload(data.skillPoints(), nodeIds, slotIds));
     }
 }

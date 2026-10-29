@@ -7,8 +7,4 @@ pluginManagement {
     }
 }
 
-plugins {
-    id "net.neoforged.moddev" version "2.0.78"
-}
-
 rootProject.name = "elimentas"

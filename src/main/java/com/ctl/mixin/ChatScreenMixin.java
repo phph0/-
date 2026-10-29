@@ -1,7 +1,7 @@
-package com.chattranslation.mixin;
+package com.ctl.mixin;
 
-import com.chattranslation.chat.ChatTranslationManager;
-import com.chattranslation.config.ConfigManager;
+import com.ctl.chat.ChatTranslationManager;
+import com.ctl.config.ConfigManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
@@ -40,7 +40,7 @@ public class ChatScreenMixin {
         int messageIndex = (int) (relativeY / lineHeight);
 
         ChatHudAccessor accessor = (ChatHudAccessor) chatHud;
-        List<ChatHudLine> messages = accessor.chattranslation$getMessages();
+        List<ChatHudLine> messages = accessor.ctl$getMessages();
 
         if (messageIndex >= 0 && messageIndex < messages.size()) {
             String messageText = messages.get(messageIndex).content().getString();

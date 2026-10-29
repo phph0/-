@@ -1,19 +1,19 @@
 {
   "schemaVersion": 1,
-  "id": "chattranslation",
+  "id": "ctl",
   "version": "${version}",
   "name": "CTL",
   "description": "Translate chat messages in-game with a single click",
   "authors": ["phph0"],
   "contact": {},
   "license": "MIT",
-  "icon": "assets/chattranslation/icon.png",
+  "icon": "assets/ctl/icon.png",
   "environment": "client",
   "entrypoints": {
-    "client": ["com.chattranslation.ChatTranslationMod"],
-    "modmenu": ["com.chattranslation.ui.ModMenuIntegration"]
+    "client": ["com.ctl.ChatTranslationMod"],
+    "modmenu": ["com.ctl.ui.ModMenuIntegration"]
   },
-  "mixins": ["chattranslation.mixins.json"],
+  "mixins": ["ctl.mixins.json"],
   "depends": {
     "fabricloader": ">=0.16.0",
     "minecraft": "~1.21",

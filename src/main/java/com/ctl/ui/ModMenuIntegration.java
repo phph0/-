@@ -1,4 +1,4 @@
-package com.chattranslation.ui;
+package com.ctl.ui;
 
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;

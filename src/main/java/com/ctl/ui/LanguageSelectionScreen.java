@@ -1,8 +1,8 @@
-package com.chattranslation.ui;
+package com.ctl.ui;
 
-import com.chattranslation.config.ConfigManager;
-import com.chattranslation.translation.LanguageInfo;
-import com.chattranslation.translation.LanguageManager;
+import com.ctl.config.ConfigManager;
+import com.ctl.translation.LanguageInfo;
+import com.ctl.translation.LanguageManager;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -24,7 +24,7 @@ public class LanguageSelectionScreen extends Screen {
     private String selectedCode;
 
     public LanguageSelectionScreen(Screen parent) {
-        super(Text.translatable("chattranslation.language.title"));
+        super(Text.translatable("ctl.language.title"));
         this.parent = parent;
         this.selectedCode = ConfigManager.getConfig().getTargetLanguage();
         this.filteredLanguages = LanguageManager.getAllLanguages();
@@ -36,7 +36,7 @@ public class LanguageSelectionScreen extends Screen {
 
         // Search field
         searchField = new TextFieldWidget(this.textRenderer, centerX - 100, 30, 200, 20,
-                Text.translatable("chattranslation.language.search"));
+                Text.translatable("ctl.language.search"));
         searchField.setPlaceholder(Text.literal("Search..."));
         searchField.setChangedListener(this::onSearchChanged);
         addDrawableChild(searchField);

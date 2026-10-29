@@ -1,9 +1,9 @@
-package com.chattranslation.mixin;
+package com.ctl.mixin;
 
-import com.chattranslation.chat.ChatMessageData;
-import com.chattranslation.chat.ChatTranslationManager;
-import com.chattranslation.config.ConfigManager;
-import com.chattranslation.translation.TranslationResult;
+import com.ctl.chat.ChatMessageData;
+import com.ctl.chat.ChatTranslationManager;
+import com.ctl.config.ConfigManager;
+import com.ctl.translation.TranslationResult;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.ChatHud;

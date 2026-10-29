@@ -1,4 +1,4 @@
-package com.chattranslation.translation;
+package com.ctl.translation;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

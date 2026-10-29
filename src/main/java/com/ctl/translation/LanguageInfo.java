@@ -1,4 +1,4 @@
-package com.chattranslation.translation;
+package com.ctl.translation;
 
 public record LanguageInfo(
         String code,

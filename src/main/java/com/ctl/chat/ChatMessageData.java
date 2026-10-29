@@ -1,4 +1,4 @@
-package com.chattranslation.chat;
+package com.ctl.chat;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

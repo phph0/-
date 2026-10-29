@@ -1,4 +1,4 @@
-package com.chattranslation.config;
+package com.ctl.config;
 
 public class ChatTranslationConfig {
     private boolean enabled = true;

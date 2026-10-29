@@ -1,0 +1,11 @@
+{
+  "ctl.config.title": "CTL Settings",
+  "ctl.config.enabled": "Enable Translation",
+  "ctl.config.target_language": "Target Language",
+  "ctl.config.select_language": "Select Language",
+  "ctl.config.current": "Current: %s",
+  "ctl.language.title": "Select Language",
+  "ctl.language.search": "Search...",
+  "ctl.translation.prefix": "└",
+  "ctl.translation.loading": "Translating..."
+}

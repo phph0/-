@@ -1,9 +1,9 @@
-package com.chattranslation.ui;
+package com.ctl.ui;
 
-import com.chattranslation.config.ChatTranslationConfig;
-import com.chattranslation.config.ConfigManager;
-import com.chattranslation.translation.LanguageInfo;
-import com.chattranslation.translation.LanguageManager;
+import com.ctl.config.ChatTranslationConfig;
+import com.ctl.config.ConfigManager;
+import com.ctl.translation.LanguageInfo;
+import com.ctl.translation.LanguageManager;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -13,7 +13,7 @@ public class ConfigScreen extends Screen {
     private final Screen parent;
 
     public ConfigScreen(Screen parent) {
-        super(Text.translatable("chattranslation.config.title"));
+        super(Text.translatable("ctl.config.title"));
         this.parent = parent;
     }
 

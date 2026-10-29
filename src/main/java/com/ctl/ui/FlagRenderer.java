@@ -1,4 +1,4 @@
-package com.chattranslation.ui;
+package com.ctl.ui;
 
 import net.minecraft.client.gui.DrawContext;
 

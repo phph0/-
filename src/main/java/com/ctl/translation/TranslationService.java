@@ -1,6 +1,6 @@
-package com.chattranslation.translation;
+package com.ctl.translation;
 
-import com.chattranslation.ChatTranslationMod;
+import com.ctl.ChatTranslationMod;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 

@@ -1,4 +1,4 @@
-package com.chattranslation.mixin;
+package com.ctl.mixin;
 
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
@@ -10,8 +10,8 @@ import java.util.List;
 @Mixin(ChatHud.class)
 public interface ChatHudAccessor {
     @Accessor("messages")
-    List<ChatHudLine> chattranslation$getMessages();
+    List<ChatHudLine> ctl$getMessages();
 
     @Accessor("visibleMessages")
-    List<ChatHudLine.Visible> chattranslation$getVisibleMessages();
+    List<ChatHudLine.Visible> ctl$getVisibleMessages();
 }

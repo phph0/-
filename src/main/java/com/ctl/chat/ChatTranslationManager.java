@@ -1,9 +1,9 @@
-package com.chattranslation.chat;
+package com.ctl.chat;
 
-import com.chattranslation.config.ConfigManager;
-import com.chattranslation.translation.LanguageManager;
-import com.chattranslation.translation.TranslationResult;
-import com.chattranslation.translation.TranslationService;
+import com.ctl.config.ConfigManager;
+import com.ctl.translation.LanguageManager;
+import com.ctl.translation.TranslationResult;
+import com.ctl.translation.TranslationService;
 import net.minecraft.client.MinecraftClient;
 
 import java.util.Map;

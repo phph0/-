@@ -1,0 +1,8 @@
+{
+  "key.spyglasszoom.zoom": "Zoom",
+  "category.spyglasszoom": "Spyglass Zoom",
+  "screen.spyglasszoom.config.title": "Spyglass Zoom Settings",
+  "option.spyglasszoom.zoom_level": "Zoom Level",
+  "option.spyglasszoom.zoom_speed": "Zoom Speed",
+  "option.spyglasszoom.show_overlay": "Spyglass Overlay"
+}

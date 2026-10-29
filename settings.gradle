@@ -6,4 +6,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "chat-translation"
+rootProject.name = "spyglass-zoom"

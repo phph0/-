@@ -1,22 +1,28 @@
 {
   "schemaVersion": 1,
-  "id": "ctl",
+  "id": "spyglasszoom",
   "version": "${version}",
-  "name": "CTL",
-  "description": "Translate chat messages in-game with a single click",
+  "name": "Spyglass Zoom",
+  "description": "Press Z to zoom with spyglass overlay.",
   "authors": ["phph0"],
   "contact": {},
   "license": "MIT",
-  "icon": "assets/ctl/icon.png",
+  "icon": "assets/spyglasszoom/icon.png",
   "environment": "client",
   "entrypoints": {
-    "client": ["com.ctl.ChatTranslationMod"],
-    "modmenu": ["com.ctl.ui.ModMenuIntegration"]
+    "client": [
+      "com.spyglasszoom.SpyglassZoomMod"
+    ],
+    "modmenu": [
+      "com.spyglasszoom.ui.ModMenuIntegration"
+    ]
   },
-  "mixins": ["ctl.mixins.json"],
+  "mixins": [
+    "spyglasszoom.mixins.json"
+  ],
   "depends": {
-    "fabricloader": ">=0.16.0",
-    "minecraft": "~1.21",
+    "fabricloader": ">=0.19.0",
+    "minecraft": "~1.21.11",
     "java": ">=21",
     "fabric-api": "*"
   },

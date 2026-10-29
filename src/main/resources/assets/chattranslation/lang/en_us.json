@@ -1,5 +1,5 @@
 {
-  "chattranslation.config.title": "Chat Translation Settings",
+  "chattranslation.config.title": "CTL Settings",
   "chattranslation.config.enabled": "Enable Translation",
   "chattranslation.config.target_language": "Target Language",
   "chattranslation.config.select_language": "Select Language",

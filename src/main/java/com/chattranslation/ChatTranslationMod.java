@@ -14,6 +14,6 @@ public class ChatTranslationMod implements ClientModInitializer {
     public void onInitializeClient() {
         ConfigManager.load();
         ChatTranslationManager.init();
-        LOGGER.info("Chat Translation mod initialized");
+        LOGGER.info("CTL mod initialized");
     }
 }

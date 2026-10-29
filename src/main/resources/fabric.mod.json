@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "chattranslation",
   "version": "${version}",
-  "name": "Chat Translation",
+  "name": "CTL",
   "description": "Translate chat messages in-game with a single click",
   "authors": ["phph0"],
   "contact": {},

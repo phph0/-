@@ -1,6 +1,10 @@
 package com.elimentas.network;
 
 import com.elimentas.core.ElimenTas;
+import com.elimentas.data.ClientSkillData;
+import com.elimentas.data.ModAttachments;
+import com.elimentas.data.PlayerDataHandler;
+import com.elimentas.data.PlayerSkillData;
 import com.elimentas.effect.EffectPlayer;
 import com.elimentas.skill.*;
 import com.elimentas.skill.fire.FireballSkill;
@@ -43,6 +47,18 @@ public class NetworkModule {
                 SkillEffectPayload.STREAM_CODEC,
                 NetworkModule::handleSkillEffect
         );
+
+        registrar.playToServer(
+                NodeUnlockPayload.TYPE,
+                NodeUnlockPayload.STREAM_CODEC,
+                NetworkModule::handleNodeUnlock
+        );
+
+        registrar.playToClient(
+                SkillTreeSyncPayload.TYPE,
+                SkillTreeSyncPayload.STREAM_CODEC,
+                NetworkModule::handleSkillTreeSync
+        );
     }
 
     private static void handleSkillActivate(SkillActivatePayload payload, IPayloadContext context) {
@@ -76,6 +92,26 @@ public class NetworkModule {
     private static void handleSkillEffect(SkillEffectPayload payload, IPayloadContext context) {
         context.enqueueWork(() -> {
             EffectPlayer.play(payload.skillId(), payload.x(), payload.y(), payload.z());
+        });
+    }
+
+    private static void handleNodeUnlock(NodeUnlockPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            if (!(context.player() instanceof ServerPlayer player)) return;
+
+            ResourceLocation nodeId = ResourceLocation.parse(payload.nodeId());
+            PlayerSkillData data = player.getData(ModAttachments.SKILL_DATA);
+
+            if (data.tryUnlock(nodeId)) {
+                PlayerDataHandler.syncToClient(player);
+                ElimenTas.LOGGER.debug("Player {} unlocked node {}", player.getName().getString(), nodeId);
+            }
+        });
+    }
+
+    private static void handleSkillTreeSync(SkillTreeSyncPayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> {
+            ClientSkillData.sync(payload.skillPoints(), payload.unlockedNodes());
         });
     }
 

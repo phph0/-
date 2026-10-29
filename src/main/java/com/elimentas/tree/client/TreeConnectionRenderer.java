@@ -1,5 +1,6 @@
 package com.elimentas.tree.client;
 
+import com.elimentas.data.ClientSkillData;
 import com.elimentas.skill.Element;
 import com.elimentas.tree.SkillNode;
 import com.elimentas.tree.SkillTreeDefinition;
@@ -39,13 +40,25 @@ public class TreeConnectionRenderer {
                 float x2 = target.x() * zoom + scrollX + screenW / 2f;
                 float y2 = target.y() * zoom + scrollY + screenH / 2f;
 
-                int color = elementColor(node.element(), 0.5f);
-                float r = ((color >> 16) & 0xFF) / 255f;
-                float g = ((color >> 8) & 0xFF) / 255f;
-                float b = (color & 0xFF) / 255f;
+                boolean bothUnlocked = ClientSkillData.isUnlocked(node.id())
+                        && ClientSkillData.isUnlocked(connId);
 
-                builder.addVertex(matrix, x1, y1, 0).setColor(r, g, b, 0.6f);
-                builder.addVertex(matrix, x2, y2, 0).setColor(r, g, b, 0.3f);
+                float r, g, b, alpha;
+                if (bothUnlocked) {
+                    int color = elementColor(node.element(), 0.7f);
+                    r = ((color >> 16) & 0xFF) / 255f;
+                    g = ((color >> 8) & 0xFF) / 255f;
+                    b = (color & 0xFF) / 255f;
+                    alpha = 0.8f;
+                } else {
+                    r = 0.3f;
+                    g = 0.3f;
+                    b = 0.35f;
+                    alpha = 0.4f;
+                }
+
+                builder.addVertex(matrix, x1, y1, 0).setColor(r, g, b, alpha);
+                builder.addVertex(matrix, x2, y2, 0).setColor(r, g, b, alpha * 0.6f);
             }
         }
 
@@ -71,9 +84,9 @@ public class TreeConnectionRenderer {
     private static int lerpColor(int a, int b, float t) {
         int ar = (a >> 16) & 0xFF, ag = (a >> 8) & 0xFF, ab = a & 0xFF;
         int br = (b >> 16) & 0xFF, bg = (b >> 8) & 0xFF, bb = b & 0xFF;
-        int r = (int) (ar + (br - ar) * t);
-        int g = (int) (ag + (bg - ag) * t);
-        int bl = (int) (ab + (bb - ab) * t);
-        return (r << 16) | (g << 8) | bl;
+        int cr = (int) (ar + (br - ar) * t);
+        int cg = (int) (ag + (bg - ag) * t);
+        int cb = (int) (ab + (bb - ab) * t);
+        return (cr << 16) | (cg << 8) | cb;
     }
 }

@@ -1,10 +1,13 @@
 package com.elimentas.tree.client;
 
+import com.elimentas.data.ClientSkillData;
+import com.elimentas.network.NodeUnlockPayload;
 import com.elimentas.tree.SkillNode;
 import com.elimentas.tree.SkillTreeDefinition;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +17,7 @@ public class SkillTreeScreen extends Screen {
     private static final float MIN_ZOOM = 0.5f;
     private static final float MAX_ZOOM = 2.0f;
     private static final float ZOOM_SPEED = 0.1f;
+    private static final double CLICK_THRESHOLD = 4.0;
 
     private final StarfieldBackground starfield = new StarfieldBackground();
     private final TreeNodeRenderer nodeRenderer = new TreeNodeRenderer();
@@ -27,6 +31,7 @@ public class SkillTreeScreen extends Screen {
     private boolean dragging = false;
     private double dragStartX, dragStartY;
     private float dragScrollStartX, dragScrollStartY;
+    private boolean didDrag = false;
 
     private SkillNode hoveredNode = null;
 
@@ -59,16 +64,26 @@ public class SkillTreeScreen extends Screen {
             boolean hovered = Math.abs(mouseX - sx) < hitR && Math.abs(mouseY - sy) < hitR;
             if (hovered) hoveredNode = node;
 
-            nodeRenderer.render(graphics, node, sx, sy, zoom, hovered, animTime);
+            boolean unlocked = ClientSkillData.isUnlocked(node.id());
+            nodeRenderer.render(graphics, node, sx, sy, zoom, hovered, unlocked, animTime);
         }
 
         renderElementLabels(graphics);
+
+        renderSkillPointsHud(graphics);
 
         if (hoveredNode != null) {
             renderTooltip(graphics, mouseX, mouseY);
         }
 
         renderControls(graphics);
+    }
+
+    private void renderSkillPointsHud(GuiGraphics graphics) {
+        String text = "Skill Points: " + ClientSkillData.skillPoints();
+        int textWidth = font.width(text);
+        graphics.fill(width - textWidth - 16, 4, width - 4, 20, 0x88000000);
+        graphics.drawString(font, text, width - textWidth - 10, 7, 0xFFFFD700, false);
     }
 
     private void renderElementLabels(GuiGraphics graphics) {
@@ -87,6 +102,8 @@ public class SkillTreeScreen extends Screen {
 
     private void renderTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
         List<Component> lines = new ArrayList<>();
+        boolean unlocked = ClientSkillData.isUnlocked(hoveredNode.id());
+
         lines.add(Component.literal(hoveredNode.name()).withStyle(s ->
                 s.withColor(getElementTextColor(hoveredNode)).withBold(true)));
         lines.add(Component.literal("Element: " + hoveredNode.element().name())
@@ -94,15 +111,39 @@ public class SkillTreeScreen extends Screen {
         lines.add(Component.literal("Tier: " + hoveredNode.tier())
                 .withStyle(s -> s.withColor(0x888888)));
 
+        if (unlocked) {
+            lines.add(Component.literal("✦ UNLOCKED")
+                    .withStyle(s -> s.withColor(0x66BB6A).withBold(true)));
+        } else {
+            lines.add(Component.literal("✧ LOCKED")
+                    .withStyle(s -> s.withColor(0xFF5555)));
+            if (canUnlockLocally(hoveredNode)) {
+                lines.add(Component.literal("Click to unlock (1 SP)")
+                        .withStyle(s -> s.withColor(0xFFD700)));
+            }
+        }
+
         if (hoveredNode.skillId() != null) {
             lines.add(Component.literal("Skill: " + hoveredNode.skillId().getPath())
                     .withStyle(s -> s.withColor(0x66BB6A)));
-        } else {
-            lines.add(Component.literal("Coming soon...")
-                    .withStyle(s -> s.withColor(0x666666).withItalic(true)));
         }
 
         graphics.renderTooltip(font, lines, java.util.Optional.empty(), mouseX, mouseY);
+    }
+
+    private boolean canUnlockLocally(SkillNode node) {
+        if (ClientSkillData.isUnlocked(node.id())) return false;
+        if (ClientSkillData.skillPoints() <= 0) return false;
+
+        if (node.tier() == 0) return true;
+
+        for (net.minecraft.resources.ResourceLocation connId : node.connections()) {
+            SkillNode conn = SkillTreeDefinition.getNode(connId);
+            if (conn != null && conn.tier() < node.tier() && ClientSkillData.isUnlocked(connId)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private int getElementTextColor(SkillNode node) {
@@ -114,7 +155,7 @@ public class SkillTreeScreen extends Screen {
     }
 
     private void renderControls(GuiGraphics graphics) {
-        graphics.drawString(font, "Scroll: Zoom | Drag: Pan | ESC: Close",
+        graphics.drawString(font, "Scroll: Zoom | Drag: Pan | Click: Unlock | ESC: Close",
                 8, height - 14, 0x66FFFFFF, false);
     }
 
@@ -122,6 +163,7 @@ public class SkillTreeScreen extends Screen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0) {
             dragging = true;
+            didDrag = false;
             dragStartX = mouseX;
             dragStartY = mouseY;
             dragScrollStartX = scrollX;
@@ -135,14 +177,26 @@ public class SkillTreeScreen extends Screen {
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (button == 0) {
             dragging = false;
+            if (!didDrag && hoveredNode != null) {
+                tryUnlockNode(hoveredNode);
+            }
             return true;
         }
         return super.mouseReleased(mouseX, mouseY, button);
     }
 
+    private void tryUnlockNode(SkillNode node) {
+        if (!canUnlockLocally(node)) return;
+        PacketDistributor.sendToServer(new NodeUnlockPayload(node.id().toString()));
+    }
+
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         if (dragging && button == 0) {
+            double dist = Math.sqrt(Math.pow(mouseX - dragStartX, 2) + Math.pow(mouseY - dragStartY, 2));
+            if (dist > CLICK_THRESHOLD) {
+                didDrag = true;
+            }
             scrollX = dragScrollStartX + (float) (mouseX - dragStartX);
             scrollY = dragScrollStartY + (float) (mouseY - dragStartY);
             return true;

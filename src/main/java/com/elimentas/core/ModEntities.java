@@ -1,6 +1,7 @@
 package com.elimentas.core;
 
 import com.elimentas.skill.fire.FireballProjectile;
+import com.elimentas.skill.ice.IceShardProjectile;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
@@ -20,6 +21,14 @@ public class ModEntities {
                             .clientTrackingRange(8)
                             .updateInterval(2)
                             .build(ElimenTas.MOD_ID + ":fireball_projectile"));
+
+    public static final DeferredHolder<EntityType<?>, EntityType<IceShardProjectile>> ICE_SHARD_PROJECTILE =
+            ENTITIES.register("ice_shard_projectile", () ->
+                    EntityType.Builder.<IceShardProjectile>of(IceShardProjectile::new, MobCategory.MISC)
+                            .sized(0.3f, 0.3f)
+                            .clientTrackingRange(8)
+                            .updateInterval(2)
+                            .build(ElimenTas.MOD_ID + ":ice_shard_projectile"));
 
     public static void init(IEventBus modBus) {
         ENTITIES.register(modBus);

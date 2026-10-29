@@ -3,6 +3,8 @@ package com.elimentas.tree;
 import com.elimentas.core.ElimenTas;
 import com.elimentas.skill.Element;
 import com.elimentas.skill.fire.FireballSkill;
+import com.elimentas.skill.ice.IceShardSkill;
+import com.elimentas.skill.lightning.LightningBoltSkill;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.*;
@@ -42,7 +44,7 @@ public class SkillTreeDefinition {
         float cx = 200, cy = 0;
 
         SkillNode core = node("ice_core", "Ice Core", Element.ICE, 0, cx, cy, null);
-        SkillNode shard = node("ice_shard", "Ice Shard", Element.ICE, 1, cx - 70, cy - 70, null);
+        SkillNode shard = node("ice_shard", "Ice Shard", Element.ICE, 1, cx - 70, cy - 70, IceShardSkill.ID);
         SkillNode frost = node("ice_frost", "Frost Nova", Element.ICE, 1, cx + 70, cy - 70, null);
         SkillNode blizzard = node("ice_blizzard", "Blizzard", Element.ICE, 2, cx, cy - 150, null);
         SkillNode wall = node("ice_wall", "Ice Wall", Element.ICE, 1, cx - 90, cy + 50, null);
@@ -62,7 +64,7 @@ public class SkillTreeDefinition {
         float cx = 0, cy = 250;
 
         SkillNode core = node("lightning_core", "Lightning Core", Element.LIGHTNING, 0, cx, cy, null);
-        SkillNode bolt = node("lightning_bolt", "Lightning Bolt", Element.LIGHTNING, 1, cx - 80, cy - 60, null);
+        SkillNode bolt = node("lightning_bolt", "Lightning Bolt", Element.LIGHTNING, 1, cx - 80, cy - 60, LightningBoltSkill.ID);
         SkillNode chain = node("lightning_chain", "Chain Lightning", Element.LIGHTNING, 1, cx + 80, cy - 60, null);
         SkillNode storm = node("lightning_storm", "Thunderstorm", Element.LIGHTNING, 2, cx, cy - 140, null);
         SkillNode dash = node("lightning_dash", "Thunder Dash", Element.LIGHTNING, 1, cx - 60, cy + 80, null);

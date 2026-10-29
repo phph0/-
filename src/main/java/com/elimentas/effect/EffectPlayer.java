@@ -1,6 +1,8 @@
 package com.elimentas.effect;
 
 import com.elimentas.skill.fire.FireballSkill;
+import com.elimentas.skill.ice.IceShardSkill;
+import com.elimentas.skill.lightning.LightningBoltSkill;
 
 public class EffectPlayer {
 
@@ -13,6 +15,14 @@ public class EffectPlayer {
             CAMERA_SHAKE.start(0.6f, 10);
             SLOW_MOTION.start(0.3f, 8);
             SCREEN_TINT.start(0xFF5A1F, 15);
+        } else if (skillId.equals(IceShardSkill.ID.toString())) {
+            CAMERA_SHAKE.start(0.3f, 8);
+            SLOW_MOTION.start(0.5f, 6);
+            SCREEN_TINT.start(0x4FC3F7, 12);
+        } else if (skillId.equals(LightningBoltSkill.ID.toString())) {
+            CAMERA_SHAKE.start(0.8f, 6);
+            SLOW_MOTION.start(0.2f, 10);
+            SCREEN_TINT.start(0xCE93D8, 8);
         }
     }
 

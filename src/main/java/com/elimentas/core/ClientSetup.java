@@ -3,6 +3,7 @@ package com.elimentas.core;
 import com.elimentas.effect.EffectModule;
 import com.elimentas.input.KeyBindings;
 import com.elimentas.skill.fire.FireballProjectileRenderer;
+import com.elimentas.skill.ice.IceShardProjectileRenderer;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -27,5 +28,6 @@ public class ClientSetup {
     @SubscribeEvent
     public static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(ModEntities.FIREBALL_PROJECTILE.get(), FireballProjectileRenderer::new);
+        event.registerEntityRenderer(ModEntities.ICE_SHARD_PROJECTILE.get(), IceShardProjectileRenderer::new);
     }
 }

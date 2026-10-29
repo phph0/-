@@ -1,6 +1,7 @@
 package com.ctl.mixin;
 
 import com.ctl.ChatTranslationMod;
+import com.ctl.chat.ChatMessageData;
 import com.ctl.chat.ChatTranslationManager;
 import com.ctl.config.ConfigManager;
 import net.minecraft.client.MinecraftClient;
@@ -42,13 +43,13 @@ public class ChatScreenMixin {
 
         int messageIndex = (int) (relativeY / lineHeight);
 
-        List<ChatHudLine> messages = accessor.ctl$getMessages();
+        List<ChatHudLine.Visible> visibleMessages = accessor.ctl$getVisibleMessages();
 
-        ChatTranslationMod.LOGGER.info("[CTL] click at ({}, {}) -> relative=({}, {}) lineHeight={} index={} messagesSize={}",
-                click.x(), click.y(), relativeX, relativeY, lineHeight, messageIndex, messages.size());
+        ChatTranslationMod.LOGGER.info("[CTL] click at ({}, {}) -> relative=({}, {}) lineHeight={} index={} visibleSize={}",
+                click.x(), click.y(), relativeX, relativeY, lineHeight, messageIndex, visibleMessages.size());
 
-        if (messageIndex >= 0 && messageIndex < messages.size()) {
-            String messageText = messages.get(messageIndex).content().getString();
+        if (messageIndex >= 0 && messageIndex < visibleMessages.size()) {
+            String messageText = ChatMessageData.orderedTextToString(visibleMessages.get(messageIndex).content());
             ChatTranslationMod.LOGGER.info("[CTL] message at index {}: \"{}\"", messageIndex, messageText);
             ChatTranslationManager.toggleTranslation(messageIndex, messageText);
         } else {

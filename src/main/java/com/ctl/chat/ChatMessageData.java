@@ -1,5 +1,7 @@
 package com.ctl.chat;
 
+import net.minecraft.text.OrderedText;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,5 +29,14 @@ public record ChatMessageData(String sender, String content, String fullMessage)
 
     public boolean isSamePlayer(String playerName) {
         return sender != null && sender.equalsIgnoreCase(playerName);
+    }
+
+    public static String orderedTextToString(OrderedText text) {
+        StringBuilder builder = new StringBuilder();
+        text.accept((index, style, codePoint) -> {
+            builder.appendCodePoint(codePoint);
+            return true;
+        });
+        return builder.toString();
     }
 }

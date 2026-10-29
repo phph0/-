@@ -25,14 +25,13 @@ public abstract class ChatHudMixin {
     private List<ChatHudLine.Visible> visibleMessages;
 
     @Shadow
-    @Final
-    private List<ChatHudLine> messages;
-
-    @Shadow
     public abstract int getWidth();
 
     @Shadow
     public abstract double getChatScale();
+
+    @Shadow
+    public abstract int getVisibleLineCount();
 
     @Inject(method = "render(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/client/font/TextRenderer;IIIZZ)V", at = @At("TAIL"))
     private void renderTranslations(DrawContext context, TextRenderer textRenderer, int currentTick, int mouseX, int mouseY, boolean focused, boolean unused, CallbackInfo ci) {
@@ -46,18 +45,24 @@ public abstract class ChatHudMixin {
         if (chatScale <= 0) return;
 
         int chatWidth = getWidth();
+        int windowHeight = context.getScaledWindowHeight();
+        int lineHeight = 9;
+
+        int visibleLineCount = getVisibleLineCount();
+        int shownLines = Math.min(visibleMessages.size(), visibleLineCount);
+        // local (pre-scale) y of the chat input box baseline, matches vanilla ChatHud's own "k"
+        int baseK = (int) ((windowHeight - 40) / chatScale);
+        // local y just above the topmost currently rendered chat line: draw translations here,
+        // stacked upward, so they never overlap the real chat text underneath.
+        int stackTopY = baseK - shownLines * lineHeight;
 
         context.getMatrices().pushMatrix();
         context.getMatrices().translate(4.0f, 0.0f);
         context.getMatrices().scale((float) chatScale, (float) chatScale);
 
-        int lineHeight = 9;
-        int yOffset = 0;
+        int stackOffset = 0;
 
-        for (int i = 0; i < visibleMessages.size() && i < messages.size(); i++) {
-            ChatHudLine originalMessage = messages.get(i);
-            String messageText = originalMessage.content().getString();
-
+        for (int i = 0; i < visibleMessages.size(); i++) {
             if (!ChatTranslationManager.isExpanded(i)) {
                 continue;
             }
@@ -65,16 +70,18 @@ public abstract class ChatHudMixin {
             var entry = ChatTranslationManager.getTranslation(i);
             if (entry == null) continue;
 
-            int messageY = -lineHeight * (i + 1 + yOffset) - 1;
+            String messageText = ChatMessageData.orderedTextToString(visibleMessages.get(i).content());
 
             if (entry.loading()) {
+                stackOffset++;
+                int y = stackTopY - stackOffset * lineHeight;
+                context.fill(0, y, chatWidth, y + lineHeight, 0x80000000);
                 context.drawTextWithShadow(client.textRenderer,
-                        "  └ Translating...", 0, messageY - lineHeight, 0xFFAAAA00);
-                yOffset++;
+                        "  └ Translating...", 2, y + 1, 0xFFAAAA00);
             } else if (entry.result() != null) {
                 TranslationResult result = entry.result();
                 ChatMessageData data = ChatMessageData.parse(messageText);
-                String sender = data != null ? data.sender() : "?";
+                String sender = data.sender();
 
                 String translationLine = ChatTranslationManager.formatTranslationLine(result, sender);
 
@@ -82,24 +89,17 @@ public abstract class ChatHudMixin {
                         / chatWidth);
                 if (wrappedLines < 1) wrappedLines = 1;
 
+                String remaining = translationLine;
                 for (int line = 0; line < wrappedLines; line++) {
-                    int start = 0;
-                    String remaining = translationLine;
-                    for (int l = 0; l < line; l++) {
-                        int trimmed = client.textRenderer.trimToWidth(remaining, chatWidth).length();
-                        remaining = remaining.substring(trimmed);
-                    }
                     String lineText = client.textRenderer.trimToWidth(remaining, chatWidth);
+                    remaining = remaining.substring(lineText.length());
 
-                    context.fill(0, messageY - lineHeight * (wrappedLines - line),
-                            chatWidth, messageY - lineHeight * (wrappedLines - line - 1),
-                            0x80000000);
+                    stackOffset++;
+                    int y = stackTopY - stackOffset * lineHeight;
+                    context.fill(0, y, chatWidth, y + lineHeight, 0x80000000);
                     context.drawTextWithShadow(client.textRenderer, lineText,
-                            line == 0 ? 2 : 0,
-                            messageY - lineHeight * (wrappedLines - line) + 1,
-                            0xFF88CCFF);
+                            line == 0 ? 2 : 10, y + 1, 0xFF88CCFF);
                 }
-                yOffset += wrappedLines;
             }
         }
 

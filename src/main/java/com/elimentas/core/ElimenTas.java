@@ -19,6 +19,7 @@ public class ElimenTas {
     public ElimenTas(IEventBus modBus) {
         LOGGER.info("ElimenTas initializing...");
 
+        ModEntities.init(modBus);
         DataModule.init(modBus);
         TreeModule.init(modBus);
         SkillModule.init(modBus);

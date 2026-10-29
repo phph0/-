@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "com.chattranslation.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "ChatHudAccessor",
+    "ChatHudMixin",
+    "ChatScreenMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

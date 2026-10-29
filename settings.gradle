@@ -1,9 +1,14 @@
 pluginManagement {
     repositories {
-        maven { url "https://maven.fabricmc.net/" }
+        mavenLocal()
+        maven { url = "https://maven.neoforged.net/releases" }
         mavenCentral()
         gradlePluginPortal()
     }
 }
 
-rootProject.name = "chat-translation"
+plugins {
+    id "net.neoforged.moddev" version "2.0.78"
+}
+
+rootProject.name = "elimentas"

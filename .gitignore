@@ -14,10 +14,13 @@ build/
 .classpath
 .project
 bin/
+out/
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Fabric
+# NeoForge
 run/
+runs/
+logs/

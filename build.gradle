@@ -1,51 +1,63 @@
 plugins {
-    id "fabric-loom" version "1.17.21"
-    id "maven-publish"
+    id "java-library"
+    id "net.neoforged.moddev"
 }
 
-version = project.mod_version
-group = project.maven_group
+version = mod_version
+group = mod_group_id
 
 base {
-    archivesName = project.archives_base_name
+    archivesName = mod_id
 }
 
-repositories {
-    maven { url "https://maven.terraformersmc.com/releases/" }
-}
+java.toolchain.languageVersion = JavaLanguageVersion.of(java_version)
 
-loom {
-    accessWidenerPath = null
-}
+neoForge {
+    version = project.neo_version
 
-dependencies {
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
-}
+    parchment {
+        mappingsVersion = project.parchment_mappings_version
+        minecraftVersion = project.parchment_minecraft_version
+    }
 
-processResources {
-    inputs.property "version", project.version
+    runs {
+        client {
+            client()
+            systemProperty "neoforge.enabledGameTestNamespaces", mod_id
+        }
+        server {
+            server()
+            programArgument "--nogui"
+            systemProperty "neoforge.enabledGameTestNamespaces", mod_id
+        }
+    }
 
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
     }
 }
 
-tasks.withType(JavaCompile).configureEach {
-    it.options.release = Integer.parseInt(project.java_version)
+repositories {
+    mavenLocal()
 }
 
-java {
-    sourceCompatibility = JavaVersion.toVersion(project.java_version)
-    targetCompatibility = JavaVersion.toVersion(project.java_version)
-    withSourcesJar()
+dependencies {
 }
 
-jar {
-    from("LICENSE") {
-        rename { "${it}_${project.archives_base_name}" }
+tasks.withType(ProcessResources).configureEach {
+    var replaceProperties = [
+        minecraft_version   : minecraft_version,
+        neo_version         : neo_version,
+        mod_id              : mod_id,
+        mod_name            : mod_name,
+        mod_version         : mod_version,
+        mod_authors         : mod_authors,
+        mod_description     : mod_description,
+    ]
+    inputs.properties replaceProperties
+    filesMatching(["META-INF/neoforge.mods.toml"]) {
+        expand replaceProperties
     }
 }

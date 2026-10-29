@@ -13,7 +13,7 @@ import org.joml.Matrix4f;
 public class IceShardProjectileRenderer extends EntityRenderer<IceShardProjectile> {
 
     private static final ResourceLocation TEXTURE =
-            ResourceLocation.withDefaultNamespace("textures/particle/generic_0.png");
+            ResourceLocation.fromNamespaceAndPath("elimentas", "textures/projectile/ice_shard.png");
 
     public IceShardProjectileRenderer(EntityRendererProvider.Context context) {
         super(context);

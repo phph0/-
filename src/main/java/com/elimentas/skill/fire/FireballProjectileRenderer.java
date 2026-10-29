@@ -13,7 +13,7 @@ import org.joml.Matrix4f;
 public class FireballProjectileRenderer extends EntityRenderer<FireballProjectile> {
 
     private static final ResourceLocation TEXTURE =
-            ResourceLocation.withDefaultNamespace("textures/particle/flame.png");
+            ResourceLocation.fromNamespaceAndPath("elimentas", "textures/projectile/fireball.png");
 
     public FireballProjectileRenderer(EntityRendererProvider.Context context) {
         super(context);

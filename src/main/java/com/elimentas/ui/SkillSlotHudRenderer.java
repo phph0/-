@@ -1,9 +1,9 @@
 package com.elimentas.ui;
 
 import com.elimentas.data.ClientSkillData;
+import com.elimentas.skill.Element;
 import com.elimentas.tree.SkillNode;
 import com.elimentas.tree.SkillTreeDefinition;
-import com.elimentas.tree.client.TreeConnectionRenderer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.GuiGraphics;
@@ -13,8 +13,19 @@ public class SkillSlotHudRenderer {
 
     private static final int SLOT_SIZE = 22;
     private static final int SLOT_GAP = 4;
-    private static final int PADDING = 3;
+    private static final int ICON_SIZE = 16;
     private static final String[] KEY_LABELS = {"Z", "X", "C", "V"};
+
+    private static final ResourceLocation SLOT_FRAME =
+            ResourceLocation.fromNamespaceAndPath("elimentas", "textures/gui/slot_frame.png");
+    private static final ResourceLocation SLOT_FRAME_ACTIVE =
+            ResourceLocation.fromNamespaceAndPath("elimentas", "textures/gui/slot_frame_active.png");
+    private static final ResourceLocation ICON_FIRE =
+            ResourceLocation.fromNamespaceAndPath("elimentas", "textures/skill/fire_fireball.png");
+    private static final ResourceLocation ICON_ICE =
+            ResourceLocation.fromNamespaceAndPath("elimentas", "textures/skill/ice_shard.png");
+    private static final ResourceLocation ICON_LIGHTNING =
+            ResourceLocation.fromNamespaceAndPath("elimentas", "textures/skill/lightning_bolt.png");
 
     public static void render(GuiGraphics graphics, DeltaTracker deltaTracker) {
         int screenW = graphics.guiWidth();
@@ -31,47 +42,46 @@ public class SkillSlotHudRenderer {
     }
 
     private static void renderSlot(GuiGraphics graphics, int x, int y, int slotIndex) {
-        graphics.fill(x, y, x + SLOT_SIZE, y + SLOT_SIZE, 0x88000000);
-
-        graphics.fill(x, y, x + SLOT_SIZE, y + 1, 0x66FFFFFF);
-        graphics.fill(x, y + SLOT_SIZE - 1, x + SLOT_SIZE, y + SLOT_SIZE, 0x66FFFFFF);
-        graphics.fill(x, y, x + 1, y + SLOT_SIZE, 0x66FFFFFF);
-        graphics.fill(x + SLOT_SIZE - 1, y, x + SLOT_SIZE, y + SLOT_SIZE, 0x66FFFFFF);
-
         ResourceLocation nodeId = ClientSkillData.getSlot(slotIndex);
-        if (nodeId != null) {
+        boolean hasSkill = nodeId != null;
+
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+
+        graphics.blit(hasSkill ? SLOT_FRAME_ACTIVE : SLOT_FRAME, x, y, 0, 0,
+                SLOT_SIZE, SLOT_SIZE, SLOT_SIZE, SLOT_SIZE);
+
+        if (hasSkill) {
             SkillNode node = SkillTreeDefinition.getNode(nodeId);
-            if (node != null) {
-                int color = TreeConnectionRenderer.elementColor(node.element(), 0.7f);
-                int iconColor = (0xFF << 24) | color;
+            if (node != null && node.skillId() != null) {
+                ResourceLocation icon = getSkillIcon(node.element());
+                int iconX = x + (SLOT_SIZE - ICON_SIZE) / 2;
+                int iconY = y + (SLOT_SIZE - ICON_SIZE) / 2;
+                graphics.blit(icon, iconX, iconY, 0, 0, ICON_SIZE, ICON_SIZE, ICON_SIZE, ICON_SIZE);
 
-                int iconSize = SLOT_SIZE - PADDING * 2;
-                graphics.fill(x + PADDING, y + PADDING,
-                        x + PADDING + iconSize, y + PADDING + iconSize, iconColor);
-
-                int whiteSize = iconSize / 3;
-                int cx = x + SLOT_SIZE / 2;
-                int cy = y + SLOT_SIZE / 2;
-                graphics.fill(cx - whiteSize / 2, cy - whiteSize / 2,
-                        cx + whiteSize / 2, cy + whiteSize / 2, 0xDDFFFFFF);
-
-                ResourceLocation skillId = node.skillId();
-                if (skillId != null && ClientSkillData.isOnCooldown(skillId)) {
-                    float progress = ClientSkillData.getCooldownProgress(skillId);
-                    int cooldownHeight = (int) ((SLOT_SIZE) * progress);
-
-                    RenderSystem.enableBlend();
+                if (ClientSkillData.isOnCooldown(node.skillId())) {
+                    float progress = ClientSkillData.getCooldownProgress(node.skillId());
+                    int cooldownHeight = (int) (SLOT_SIZE * progress);
                     graphics.fill(x, y + SLOT_SIZE - cooldownHeight,
                             x + SLOT_SIZE, y + SLOT_SIZE, 0xAA000000);
-                    RenderSystem.disableBlend();
                 }
             }
         }
+
+        RenderSystem.disableBlend();
 
         graphics.drawCenteredString(
                 net.minecraft.client.Minecraft.getInstance().font,
                 KEY_LABELS[slotIndex],
                 x + SLOT_SIZE / 2, y + SLOT_SIZE + 2,
-                0xAAAAAAA);
+                hasSkill ? 0xFFFFD700 : 0xAAAAAA);
+    }
+
+    private static ResourceLocation getSkillIcon(Element element) {
+        return switch (element) {
+            case FIRE -> ICON_FIRE;
+            case ICE -> ICON_ICE;
+            case LIGHTNING -> ICON_LIGHTNING;
+        };
     }
 }

@@ -36,14 +36,17 @@ public class TranslationService {
                 HttpResponse<String> response = HTTP_CLIENT.send(request,
                         HttpResponse.BodyHandlers.ofString());
 
+                ChatTranslationMod.LOGGER.info("[CTL] HTTP request url={}", url);
+
                 if (response.statusCode() != 200) {
-                    ChatTranslationMod.LOGGER.warn("Translation failed: HTTP {}", response.statusCode());
+                    ChatTranslationMod.LOGGER.warn("[CTL] Translation failed: HTTP {} body={}",
+                            response.statusCode(), response.body());
                     return null;
                 }
 
                 return parseResponse(response.body(), text, targetLang);
             } catch (Exception e) {
-                ChatTranslationMod.LOGGER.warn("Translation error", e);
+                ChatTranslationMod.LOGGER.warn("[CTL] Translation error", e);
                 return null;
             }
         });

@@ -1,5 +1,6 @@
 package com.ctl.chat;
 
+import com.ctl.ChatTranslationMod;
 import com.ctl.config.ConfigManager;
 import com.ctl.translation.LanguageManager;
 import com.ctl.translation.TranslationResult;
@@ -18,9 +19,13 @@ public class ChatTranslationManager {
     }
 
     public static void toggleTranslation(int messageIndex, String messageText) {
-        if (!ConfigManager.getConfig().isEnabled()) return;
+        if (!ConfigManager.getConfig().isEnabled()) {
+            ChatTranslationMod.LOGGER.info("[CTL] translation disabled in config");
+            return;
+        }
 
         if (expandedMessages.containsKey(messageIndex) && expandedMessages.get(messageIndex)) {
+            ChatTranslationMod.LOGGER.info("[CTL] collapsing index {}", messageIndex);
             expandedMessages.put(messageIndex, false);
             return;
         }
@@ -28,24 +33,30 @@ public class ChatTranslationManager {
         expandedMessages.put(messageIndex, true);
 
         if (translations.containsKey(messageIndex)) {
+            ChatTranslationMod.LOGGER.info("[CTL] already have translation cached for index {}", messageIndex);
             return;
         }
 
         ChatMessageData data = ChatMessageData.parse(messageText);
+        ChatTranslationMod.LOGGER.info("[CTL] parsed sender=\"{}\" content=\"{}\"", data.sender(), data.content());
 
         MinecraftClient client = MinecraftClient.getInstance();
         if (client.player != null && data.isSamePlayer(client.player.getName().getString())) {
+            ChatTranslationMod.LOGGER.info("[CTL] skipping own message");
             expandedMessages.put(messageIndex, false);
             return;
         }
 
         String targetLang = ConfigManager.getConfig().getTargetLanguage();
+        ChatTranslationMod.LOGGER.info("[CTL] requesting translation to \"{}\"", targetLang);
         translations.put(messageIndex, new TranslationEntry(null, true));
 
         TranslationService.translate(data.content(), targetLang).thenAccept(result -> {
             if (result != null) {
+                ChatTranslationMod.LOGGER.info("[CTL] translation success: \"{}\"", result.translatedText());
                 translations.put(messageIndex, new TranslationEntry(result, false));
             } else {
+                ChatTranslationMod.LOGGER.warn("[CTL] translation returned null result for index {}", messageIndex);
                 translations.remove(messageIndex);
                 expandedMessages.put(messageIndex, false);
             }

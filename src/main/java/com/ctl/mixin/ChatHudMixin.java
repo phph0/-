@@ -5,6 +5,7 @@ import com.ctl.chat.ChatTranslationManager;
 import com.ctl.config.ConfigManager;
 import com.ctl.translation.TranslationResult;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.ChatHud;
 import net.minecraft.client.gui.hud.ChatHudLine;
@@ -33,8 +34,8 @@ public abstract class ChatHudMixin {
     @Shadow
     public abstract double getChatScale();
 
-    @Inject(method = "render", at = @At("TAIL"))
-    private void renderTranslations(DrawContext context, int currentTick, int mouseX, int mouseY, boolean focused, CallbackInfo ci) {
+    @Inject(method = "render(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/client/font/TextRenderer;IIIZZ)V", at = @At("TAIL"))
+    private void renderTranslations(DrawContext context, TextRenderer textRenderer, int currentTick, int mouseX, int mouseY, boolean focused, boolean unused, CallbackInfo ci) {
         if (!ConfigManager.getConfig().isEnabled()) return;
         if (visibleMessages.isEmpty()) return;
 
@@ -46,9 +47,9 @@ public abstract class ChatHudMixin {
 
         int chatWidth = getWidth();
 
-        context.getMatrices().push();
-        context.getMatrices().translate(4.0f, 0.0f, 0.0f);
-        context.getMatrices().scale((float) chatScale, (float) chatScale, 1.0f);
+        context.getMatrices().pushMatrix();
+        context.getMatrices().translate(4.0f, 0.0f);
+        context.getMatrices().scale((float) chatScale, (float) chatScale);
 
         int lineHeight = 9;
         int yOffset = 0;
@@ -102,6 +103,6 @@ public abstract class ChatHudMixin {
             }
         }
 
-        context.getMatrices().pop();
+        context.getMatrices().popMatrix();
     }
 }

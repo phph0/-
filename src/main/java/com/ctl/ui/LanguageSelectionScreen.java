@@ -3,6 +3,7 @@ package com.ctl.ui;
 import com.ctl.config.ConfigManager;
 import com.ctl.translation.LanguageInfo;
 import com.ctl.translation.LanguageManager;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -135,8 +136,11 @@ public class LanguageSelectionScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (super.mouseClicked(mouseX, mouseY, button)) return true;
+    public boolean mouseClicked(Click click, boolean doubled) {
+        if (super.mouseClicked(click, doubled)) return true;
+
+        double mouseX = click.x();
+        double mouseY = click.y();
 
         int centerX = this.width / 2;
         int listWidth = 220;

@@ -405,13 +405,13 @@ public class FlagRenderer {
                 context.fill(x + fx, y + fy, x + fx + 1, y + fy + 1, color);
             }
         }
-        context.drawBorder(x - 1, y - 1, FLAG_WIDTH + 2, FLAG_HEIGHT + 2, 0xFF333333);
+        context.drawStrokedRectangle(x - 1, y - 1, FLAG_WIDTH + 2, FLAG_HEIGHT + 2, 0xFF333333);
     }
 
     private static void renderDefaultFlag(DrawContext context, int x, int y) {
         context.fill(x, y, x + FLAG_WIDTH, y + FLAG_HEIGHT, 0xFFAAAAAA);
         context.fill(x + 6, y + 4, x + 10, y + 7, 0xFFFFFFFF);
-        context.drawBorder(x - 1, y - 1, FLAG_WIDTH + 2, FLAG_HEIGHT + 2, 0xFF333333);
+        context.drawStrokedRectangle(x - 1, y - 1, FLAG_WIDTH + 2, FLAG_HEIGHT + 2, 0xFF333333);
     }
 
     public static int getFlagWidth() {

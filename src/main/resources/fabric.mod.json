@@ -1,26 +1,21 @@
 {
   "schemaVersion": 1,
-  "id": "ctl",
+  "id": "clientzoom",
   "version": "${version}",
-  "name": "CTL",
-  "description": "Translate chat messages in-game with a single click",
+  "name": "Client Zoom",
+  "description": "Smooth hold-to-zoom with easing and sensitivity correction",
   "authors": ["phph0"],
   "contact": {},
   "license": "MIT",
-  "icon": "assets/ctl/icon.png",
   "environment": "client",
   "entrypoints": {
-    "client": ["com.ctl.ChatTranslationMod"],
-    "modmenu": ["com.ctl.ui.ModMenuIntegration"]
+    "client": ["com.clientzoom.ClientZoomMod"]
   },
-  "mixins": ["ctl.mixins.json"],
+  "mixins": ["clientzoom.mixins.json"],
   "depends": {
-    "fabricloader": ">=0.16.0",
+    "fabricloader": ">=0.19.0",
     "minecraft": "~1.21",
     "java": ">=21",
     "fabric-api": "*"
-  },
-  "suggests": {
-    "modmenu": "*"
   }
 }

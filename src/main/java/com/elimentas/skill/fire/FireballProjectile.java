@@ -1,6 +1,6 @@
 package com.elimentas.skill.fire;
 
-import com.elimentas.core.ElimenTas;
+import com.elimentas.effect.vfx.TrailVfx;
 import com.elimentas.network.NetworkModule;
 import com.elimentas.network.SkillEffectPayload;
 import net.minecraft.core.particles.ParticleTypes;
@@ -42,9 +42,7 @@ public class FireballProjectile extends ThrowableProjectile {
         life++;
 
         if (level() instanceof ServerLevel serverLevel) {
-            Vec3 pos = position();
-            serverLevel.sendParticles(ParticleTypes.FLAME, pos.x, pos.y, pos.z, 2, 0.1, 0.1, 0.1, 0.01);
-            serverLevel.sendParticles(ParticleTypes.SMOKE, pos.x, pos.y, pos.z, 1, 0.05, 0.05, 0.05, 0.0);
+            TrailVfx.fire(serverLevel, position(), getDeltaMovement(), life);
         }
 
         if (life >= MAX_LIFE) {

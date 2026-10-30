@@ -11,6 +11,13 @@ public class ScreenTintRenderer {
     private int durationTicks;
     private int ticksRemaining;
 
+    private float intensity = 0.4f;
+
+    public void start(int color, int durationTicks, float intensity) {
+        this.intensity = intensity;
+        start(color, durationTicks);
+    }
+
     public void start(int color, int durationTicks) {
         this.color = color;
         this.durationTicks = durationTicks;
@@ -31,7 +38,7 @@ public class ScreenTintRenderer {
         if (!isActive()) return;
 
         float progress = (float) ticksRemaining / durationTicks;
-        float alpha = progress * 0.4f;
+        float alpha = progress * intensity;
 
         float r = ((color >> 16) & 0xFF) / 255f;
         float g = ((color >> 8) & 0xFF) / 255f;

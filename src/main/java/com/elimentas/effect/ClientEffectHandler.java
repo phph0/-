@@ -31,6 +31,14 @@ public class ClientEffectHandler {
         }
     }
 
+    @SubscribeEvent
+    public static void onComputeFov(ViewportEvent.ComputeFov event) {
+        FovPunchEffect punch = EffectPlayer.getFovPunch();
+        if (punch.isActive()) {
+            event.setFOV(event.getFOV() + punch.getFovOffset());
+        }
+    }
+
     @EventBusSubscriber(modid = ElimenTas.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
     public static class GuiLayerRegistration {
 

@@ -1,5 +1,6 @@
 package com.elimentas.skill.ice;
 
+import com.elimentas.effect.vfx.TrailVfx;
 import com.elimentas.network.NetworkModule;
 import com.elimentas.network.SkillEffectPayload;
 import net.minecraft.core.particles.ParticleTypes;
@@ -35,9 +36,7 @@ public class IceShardProjectile extends ThrowableProjectile {
         life++;
 
         if (level() instanceof ServerLevel serverLevel) {
-            Vec3 pos = position();
-            serverLevel.sendParticles(ParticleTypes.SNOWFLAKE, pos.x, pos.y, pos.z, 3, 0.1, 0.1, 0.1, 0.02);
-            serverLevel.sendParticles(ParticleTypes.WHITE_ASH, pos.x, pos.y, pos.z, 1, 0.05, 0.05, 0.05, 0.0);
+            TrailVfx.ice(serverLevel, position(), getDeltaMovement(), life);
         }
 
         if (life >= MAX_LIFE) {
